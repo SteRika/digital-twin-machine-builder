@@ -176,8 +176,17 @@ V10.5.3 - Stable INPUT / OUTPUT PCB Logic (Current)
 - INPUT station: jig remains empty while the 10 s INPUT process runs, then two new PCB become visible when INPUT completes and indexed movement begins.
 - Keeps all existing actual station timing, station completion indicators, CT variance, runtime forecast, Skip To End, and production metrics.
 
-
+Current production model
+------------------------
 Bottleneck Process CT = 15.0 s
 Indexed Output Cycle  = 16.0 s
 PCB per Output Cycle  = 2
 Steady-State UPH      = 450 PCB/hour
+
+Repository publication - 2026-09-28
+-----------------------------------
+- Published the project documentation and current V10.5.3 engineering state to GitHub.
+- Rebuilt README.md with setup, architecture, production timing, CT/UPH, and PCB load/unload behavior.
+- Preserved the full version history from V1 through V10.5.3 in this file.
+- Large machine-specific conveyor/jig STEP and STL assets remain excluded by .gitignore and are not published.
+- Small generated demo assets may be included for visualization.
