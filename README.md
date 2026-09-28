@@ -19,52 +19,9 @@ A Python/PySide6/VTK industrial digital-twin and machine simulation platform for
 - Display live station process status (`RUNNING` / `FINISHED`) from sequence labels.
 - Simulate indexed multi-carrier conveyor behavior and PCB load/unload state.
 
-## Current DIGI production model
-
-The bundled sample project represents a 12-jig indexed conveyor with two PCBs per loaded carrier. Stations process in parallel and all carriers move together after the bottleneck process completes.
-
-| Station | Process time |
-|---|---:|
-| Input | 10.0 s |
-| Pasting Tape | 10.7 s |
-| NFC Init | 7.5 s |
-| Gang Jig | **15.0 s** |
-| NG Pickup | 3.0 s |
-| IDLE Station | 0.0 s |
-| Output | 12.0 s |
-| Indexed movement | 1.0 s |
-
-Because **Gang Jig = 15.0 s** is the bottleneck and the index move is **1.0 s**:
-
-```text
-Indexed output cycle = 15.0 + 1.0 = 16.0 s
-Output per index      = 2 PCB
-UPH                   = 2 × 3600 / 16 = 450 PCB/hour
-```
-
 ### PCB state
 
 The current V10.5.3 runtime models load/unload explicitly:
-
-```text
-INPUT station
-  jig is empty while the 10 s INPUT process is running
-  -> INPUT completes
-  -> two PCB are loaded
-  -> indexed move begins
-
-Pasting Tape -> NFC Init -> Gang Jig -> NG Pickup -> IDLE
-  PCB remain on the jig
-
-OUTPUT station
-  PCB remain on the jig while the 12 s OUTPUT process is running
-  -> OUTPUT completes
-  -> PCB are removed
-  -> indexed move begins
-
-Return side
-  jig stays empty until INPUT completes again
-```
 
 ## Architecture
 
