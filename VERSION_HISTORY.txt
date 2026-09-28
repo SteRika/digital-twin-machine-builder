@@ -1,0 +1,195 @@
+DIGITAL TWIN MACHINE BUILDER - VERSION HISTORY
+================================================
+
+This file summarizes the development path from the first conveyor prototype through the current V10.5.3 release.
+
+V1 - Digital Twin Conveyor
+- First PySide6 conveyor digital twin.
+- One conveyor, input sensor, output sensor, product travel, completed counter.
+- Basic simulation architecture established.
+
+V2 - Arduino Integration
+- Connected the desktop digital twin to Arduino hardware.
+- Added S1/S2 sensor inputs and conveyor motor relay control.
+- Added serial communication and matching Arduino firmware.
+
+V3 - Station Cycle-Time Simulator
+- Added machine-layout-based station mapping.
+- Stations could be positioned on a drawing and assigned cycle times.
+- Added multi-run simulation and process variation.
+- Reported nominal, average, minimum, and maximum input-to-output cycle time.
+
+V4 - Clean Mapper
+- Refined the station-mapping workflow and project structure.
+- Prepared the route/station model for later conveyor simulation versions.
+
+V5 - Route Simulator
+- Introduced route-oriented product movement between configured stations.
+- Added a clearer visual route representation.
+
+V5.1 - Route Simulator Refinement
+- Improved the V5 route workflow and simulation behavior.
+
+V6 - Continuous Line Experiment
+- Tested an asynchronous/continuous production-line model.
+- This branch was later replaced because the target machine is an indexed circular conveyor where all carriers move together.
+
+V7 - Indexed Conveyor
+- Returned to the correct indexed-conveyor model.
+- All occupied stations process in parallel, then all carriers index together.
+
+V7.1 - Indexed Conveyor Refinement
+- Refined station and indexed-cycle behavior before real-time timing was introduced.
+
+V7.2 - Real-Time Cycle Time
+- Station CT values became real wall-clock processing time.
+- Faster stations finish and wait while the slowest station controls the indexed process phase.
+
+V7.3 - Wall-Clock Timing Fix
+- Removed simulation-speed scaling from station CT.
+- 10 s configured CT now means 10 actual seconds.
+- Indexed movement was modeled separately from processing time.
+
+V8 - OOP Refactor
+- Refactored the indexed simulator into a cleaner object-oriented architecture.
+- Standardized station, product, simulation, service, and UI responsibilities.
+- Set indexed movement to 1 real second.
+
+V9 - 3D Digital Twin
+- First fully 3D version using the actual conveyor and jig-carrier CAD.
+- Used STEP source models with STL runtime meshes.
+- Added PCB visualization, indexed carriers, station editing, WIP, CT, UPH, and lead-time metrics.
+
+V9.1 - 3D Alignment Calibration
+- Added live route/CAD alignment calibration controls.
+- Route width, curve centers, offsets, starting fraction, jig height, yaw, and PCB offsets became adjustable without editing code.
+
+V9.1.1 - Calibration Startup Fix
+- Fixed a packaging/indentation regression that moved MainWindow methods outside the class.
+- Restored simulation tick and calibration method availability.
+
+V9.2 - Drag Alignment
+- Added direct route dragging in the 3D viewer.
+- Improved station UP/DOWN controls.
+- Improved calibration spinbox usability.
+
+V9.3 - Individual Jig Alignment
+- Added one-by-one jig carrier selection and drag alignment.
+- Added per-jig X/Z calibration offsets and reset controls.
+- Saved jig offsets in project configuration and interpolated them during indexed movement.
+
+V10.0 - STEP-Based Machine Builder
+- Major architecture shift from a fixed conveyor simulator to a reusable machine builder.
+- Added STEP/STP component library, assembly workspace, motion profiles, machine sequence, and digital-twin runtime.
+- STEP became the mechanical source of truth; STL is used as a rendering cache.
+
+V10.1 - Drag Assembly
+- Added drag-and-drop STEP component placement in the Assembly workspace.
+- Added direct 3D component positioning plus numeric fine tuning.
+
+V10.1.1 - Drag + Zoom
+- Preserved mouse-wheel zoom while MOVE PARTS mode is active for precision alignment.
+
+V10.1.2 - Assembly Interaction Refinement
+- Continued stabilization of drag/zoom behavior and assembly interaction.
+
+V10.1.3 - Drag + Zoom + Orbit
+- Added Dashboard-style camera orbit in the Assembly workspace.
+- Left-drag on a component moves it; left-drag on empty space orbits the POV.
+
+V10.1.4 - Motion Workflow
+- Added an explicit New Motion / Add Motion workflow from assembled parts.
+- Made it practical to create multiple independent motion profiles for one assembled component.
+
+V10.2 - Production Cycle & Throughput
+- Added INPUT, OUTPUT, WAIT, and MOTION sequence step types.
+- Added production-cycle measurement and UPH calculations from INPUT-to-OUTPUT markers.
+- Added output quantity per cycle.
+
+V10.2.1 - Editable Sequence
+- Existing sequence rows became directly editable.
+- Added selected-step editor for block, type, motion, target, duration, and label.
+- CT and UPH recalculate immediately after sequence edits.
+
+V10.3 - PATH Motion
+- Added PATH as a third motion type alongside LINEAR and ROTARY.
+- Users can pick conveyor waypoints directly in the 3D viewer.
+- Added spline smoothing and optional heading-following behavior.
+
+V10.3.1 - Chained PATH Motion
+- Added path-to-path chaining.
+- A new PATH can start from the END of another PATH instead of always restarting from Assembly HOME.
+- Added CONTINUE PATH workflow and circular-dependency protection.
+
+V10.3.2 - Custom PATH Start
+- Added CUSTOM 3D START POINT.
+- Each PATH can start from Assembly HOME, another PATH endpoint, or a user-picked 3D start point.
+
+V10.3.3 - Deterministic PATH Runtime
+- Fixed path-offset accumulation that could push a jig off the track.
+- Only the active/current PATH controls the resolved path pose.
+- Every new run resets motion state to Assembly HOME before execution.
+
+V10.3.4 - MachineView Class Fix
+- Fixed an indentation regression that moved runtime/view methods out of MachineView.
+- Restored mouse wheel, zoom, camera, render, and scene methods.
+
+V10.3.5 - 12-Jig Production Demo
+- Added a 12-carrier indexed conveyor project.
+- Aligned carriers to physical conveyor base positions.
+- Added two visual PCBs per jig and synchronized their movement.
+- Added per-component display coloring.
+
+V10.3.6 - Project Schema Compatibility
+- Removed project dependence on a `color` constructor field.
+- Viewer now derives PCB/jig/conveyor colors from component type.
+- Loader ignores unknown future metadata fields instead of crashing.
+
+V10.4 - Production Runtime Simulator
+- Added user-selected Hours / Minutes / Seconds runtime.
+- Added average process/index CT, average CT per output, projected output, completed processes, and effective UPH.
+- Added SKIP TO END for instant calculation without waiting for the animation.
+
+V10.4.1 - CT Variance
+- Added optional Min CT / Max CT variance range.
+- Simulation can vary indexed production CT while maintaining complete-cycle output counting.
+- Runtime forecast and Skip To End support the same variance model.
+
+V10.5 - Actual DIGI Station Flow
+- Replaced the generic 14 s demo with the actual requested station process flow:
+  Input 10.0 s, Pasting Tape 10.7 s, NFC Init 7.5 s, Gang Jig 15.0 s, NG Pickup 3.0 s, IDLE 0.0 s, Output 12.0 s.
+- All stations process in parallel.
+- Gang Jig is the 15 s bottleneck; with 1 s index movement, steady-state index CT is 16 s.
+- With two PCB per loaded jig, steady-state throughput is 450 UPH.
+- Added LIVE STATION PROCESS STATUS indicator driven from sequence labels.
+- Added PCB load/unload visualization around INPUT and OUTPUT.
+
+V10.5.1 - Runtime Import Fix
+- Fixed missing Python `re` import used by PCB instance matching.
+
+V10.5.2 - Stable PCB Visibility
+- Reworked PCB visibility to be based on production position rather than transient animation state.
+- Reapplied production PCB visibility after runtime transforms to reduce flicker.
+
+V10.5.3 - Stable INPUT / OUTPUT PCB Logic (Current)
+- Corrected PCB instance regex matching.
+- OUTPUT station: PCB remains visible while the 12 s OUTPUT process runs, then is removed when indexed movement begins.
+- Return side: jig remains empty for the complete return path.
+- INPUT station: jig remains empty while the 10 s INPUT process runs, then two new PCB become visible when INPUT completes and indexed movement begins.
+- Keeps all existing actual station timing, station completion indicators, CT variance, runtime forecast, Skip To End, and production metrics.
+
+CURRENT PRODUCTION MODEL
+------------------------
+Input          10.0 s
+Pasting Tape   10.7 s
+NFC Init        7.5 s
+Gang Jig       15.0 s
+NG Pickup       3.0 s
+IDLE Station    0.0 s
+Output         12.0 s
+Index Move      1.0 s
+
+Bottleneck Process CT = 15.0 s
+Indexed Output Cycle  = 16.0 s
+PCB per Output Cycle  = 2
+Steady-State UPH      = 450 PCB/hour

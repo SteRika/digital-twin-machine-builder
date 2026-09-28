@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.pytest_cache/
+.venv/
+venv/
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Generated / packaged artifacts
+*.zip
+*.mp4
+*.log
+
+# Large CAD assets are intentionally not committed to the public repository.
+workspace/components/conveyor.step
+workspace/components/jig_carrier.step
+workspace/cache/conveyor.stl
+workspace/cache/jig_carrier.stl
+
+# User-created project copies
+workspace/*.bak
