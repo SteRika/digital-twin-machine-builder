@@ -156,8 +156,6 @@ V10.4.1 - CT Variance
 - Runtime forecast and Skip To End support the same variance model.
 
 V10.5 - Actual DIGI Station Flow
-- Replaced the generic 14 s demo with the actual requested station process flow:
-  Input 10.0 s, Pasting Tape 10.7 s, NFC Init 7.5 s, Gang Jig 15.0 s, NG Pickup 3.0 s, IDLE 0.0 s, Output 12.0 s.
 - All stations process in parallel.
 - Gang Jig is the 15 s bottleneck; with 1 s index movement, steady-state index CT is 16 s.
 - With two PCB per loaded jig, steady-state throughput is 450 UPH.
@@ -178,16 +176,6 @@ V10.5.3 - Stable INPUT / OUTPUT PCB Logic (Current)
 - INPUT station: jig remains empty while the 10 s INPUT process runs, then two new PCB become visible when INPUT completes and indexed movement begins.
 - Keeps all existing actual station timing, station completion indicators, CT variance, runtime forecast, Skip To End, and production metrics.
 
-CURRENT PRODUCTION MODEL
-------------------------
-Input          10.0 s
-Pasting Tape   10.7 s
-NFC Init        7.5 s
-Gang Jig       15.0 s
-NG Pickup       3.0 s
-IDLE Station    0.0 s
-Output         12.0 s
-Index Move      1.0 s
 
 Bottleneck Process CT = 15.0 s
 Indexed Output Cycle  = 16.0 s
