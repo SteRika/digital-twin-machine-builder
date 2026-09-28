@@ -1,43 +1,105 @@
 # Digital Twin Machine Builder
 
-A Python/PySide6/VTK industrial digital-twin and machine simulation platform for building machines from STEP/STP components, assembling them in 3D, defining motions and machine sequences, and evaluating production performance such as cycle time and UPH.
+A Python / PySide6 / VTK industrial digital-twin and production-simulation platform for building machines from STEP/STP components, assembling them in 3D, defining machine motion and process sequences, and evaluating cycle time, throughput, and production output.
 
-**Current version: V10.5.3**
+**Current release: V10.5.3**
 
-## What it does
+## Current DIGI production model
+
+The bundled production logic represents a 12-carrier indexed conveyor with **2 PCB per loaded jig**.
+
+| Station | Process time |
+|---|---:|
+| Input | 10.0 s |
+| Pasting Tape | 10.7 s |
+| NFC Init | 7.5 s |
+| Gang Jig | 15.0 s |
+| NG Pickup | 3.0 s |
+| IDLE Station | 0.0 s |
+| Output | 12.0 s |
+
+All stations process in parallel. **Gang Jig (15.0 s)** is the bottleneck. With a **1.0 s synchronized conveyor index**, the steady-state output cycle is:
+
+```text
+15.0 s process bottleneck
++1.0 s synchronized index
+=16.0 s / output cycle
+
+2 PCB / output cycle
+=450 PCB/hour steady-state
+```
+
+## V10.5.3 PCB state logic
+
+The current runtime models the actual load/unload behavior instead of simply showing PCB on every jig.
+
+```text
+OUTPUT
+PCB stays on the jig while the 12 s OUTPUT process is running.
+When OUTPUT finishes and the index move begins -> PCB is removed.
+
+RETURN SIDE
+Jig remains empty.
+
+INPUT
+Jig remains empty while the 10 s INPUT process is running.
+When INPUT finishes and the index move begins -> 2 new PCB are loaded.
+```
+
+This prevents PCB blinking or incorrectly reappearing on the empty return side.
+
+## Core capabilities
 
 - Import STEP/STP mechanical components.
-- Assemble a complete machine in a 3D workspace.
-- Drag, zoom, orbit, and numerically align components.
+- Assemble components in a 3D VTK workspace.
+- Drag, zoom, orbit, and numerically align machine components.
 - Define `LINEAR`, `ROTARY`, and waypoint-based `PATH` motions.
-- Chain PATH motions or start them from custom 3D positions.
-- Build machine sequences with `INPUT`, `OUTPUT`, `WAIT`, and `MOTION` steps.
-- Execute same-block steps in parallel.
-- Calculate production CT, average process/index CT, average CT per output, WIP-oriented throughput, and UPH.
-- Run production simulations for a selected duration in hours/minutes/seconds.
-- Add CT variance ranges and instantly calculate long runs with **SKIP TO END**.
-- Display live station process status (`RUNNING` / `FINISHED`) from sequence labels.
-- Simulate indexed multi-carrier conveyor behavior and PCB load/unload state.
+- Pick PATH waypoints directly in 3D.
+- Chain PATH motions or use custom 3D PATH start positions.
+- Build sequences using `INPUT`, `OUTPUT`, `WAIT`, and `MOTION` steps.
+- Execute same-block operations in parallel.
+- Calculate production CT, process/index CT, CT per output, projected output, and UPH.
+- Configure runtime in Hours / Minutes / Seconds.
+- Apply Min / Max CT variance.
+- Use **SKIP TO END** for instant long-duration production calculation.
+- Display live station status (`RUNNING` / `FINISHED`) from Sequence labels.
+- Simulate synchronized multi-carrier indexed movement.
+- Model PCB load/unload state through the production route.
 
-### PCB state
+## Workflow
 
-The current V10.5.3 runtime models load/unload explicitly:
+```text
+Import STEP / STP
+        ↓
+Component Library
+        ↓
+Assembly
+        ↓
+Motion Setup
+        ↓
+Machine Sequence
+        ↓
+Digital Twin Runtime
+        ↓
+CT / UPH / Production Analysis
+```
 
-## Architecture
+## Project structure
 
 ```text
 main.py
 app/
 ├── controllers/     runtime sequence player
-├── models/          machine/project data models
+├── models/          project and machine data models
 ├── pages/           Dashboard, Components, Assembly, Motion, Sequence, Digital Twin
 ├── services/        project, STEP import, mesh, path and validation services
 ├── simulation/      sequence / production metric engine
 ├── views/           VTK 3D machine workspace
-└── widgets/         reusable Qt widgets
+└── widgets/         reusable PySide6 widgets
 
-tests/               unit tests for project, sequence, path, CT/UPH and production logic
-workspace/           sample project and generated small PCB assets
+tests/               regression tests
+workspace/           project workspace / demo configuration
+VERSION_HISTORY.txt  development history from V1 to V10.5.3
 ```
 
 ## Requirements
@@ -59,9 +121,17 @@ Run:
 python main.py
 ```
 
+Run tests:
+
+```bash
+python -m unittest discover -s tests
+```
+
+The V10.5.3 source snapshot was regression-tested with **30 passing unit tests** before publication.
+
 ## CAD assets
 
-The public repository does **not** include the large source conveyor/jig STEP files or their generated STL caches. The sample `workspace/project.json` references these paths:
+The simulator is designed around STEP/STP source geometry. Large machine-specific conveyor and jig CAD files are intentionally excluded from the public repository through `.gitignore`:
 
 ```text
 workspace/components/conveyor.step
@@ -70,70 +140,18 @@ workspace/cache/conveyor.stl
 workspace/cache/jig_carrier.stl
 ```
 
-Place your own matching files there, or use **Import STEP** inside the application and build a new project. The generated dummy PCB STEP/STL files are included because they are small and are part of the simulator demo.
-
-## Main workflow
-
-```text
-Import STEP / STP
-        ↓
-Component Library
-        ↓
-Assembly
-        ↓
-Motion Setup
-        ↓
-Machine Sequence
-        ↓
-Digital Twin Runtime
-        ↓
-CT / UPH / Production Analysis
-```
-
-## Motion types
-
-### LINEAR
-Move along a configured axis.
-
-### ROTARY
-Rotate around a configured axis.
-
-### PATH
-Pick waypoints directly in the 3D viewer. PATH supports smoothing, chaining from another PATH endpoint, and a custom 3D start point.
-
-## Sequence execution
-
-Steps sharing the same block number execute in parallel. A block completes when its longest timed step is complete. This matches the indexed conveyor model where all stations work simultaneously and the slowest active station controls when the next index can occur.
-
-## Production runtime
-
-The Digital Twin page supports:
-
-- Hours / Minutes / Seconds run target.
-- CT variance Min/Max.
-- Average process/index CT.
-- Average CT per output.
-- Output per process.
-- Projected output.
-- Effective UPH.
-- Live elapsed time.
-- **SKIP TO END** for instant long-run calculation.
-- Live station completion status generated from Sequence `WAIT` labels.
-
-## Tests
-
-Run the test suite with:
-
-```bash
-python -m unittest discover -s tests
-```
+Use your own matching CAD files, or import STEP/STP components through the application. Small generated demo assets such as the dummy PCB may remain in the repository.
 
 ## Version history
 
-See [`VERSION_HISTORY.txt`](VERSION_HISTORY.txt) for the full development history from V1 through V10.5.3.
+See [VERSION_HISTORY.txt](VERSION_HISTORY.txt) for the complete development history from the first conveyor prototype through V10.5.3.
 
-## Repository status
+## Repository
 
-This is an active engineering/R&D project. The current focus is industrial digital-twin workflow, indexed conveyor simulation, real process sequencing, and production-performance analysis.
+https://github.com/SteRika/digital-twin-machine-builder
+
+## Status
+
+Active engineering / R&D project focused on industrial digital twins, indexed conveyor simulation, machine sequencing, and production-performance analysis.
 
 No open-source license has been selected yet.
