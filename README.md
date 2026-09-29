@@ -3,23 +3,6 @@
 A Python / PySide6 / VTK industrial digital-twin and production-simulation platform for building machines from STEP/STP components, assembling them in 3D, defining machine motion and process sequences, and evaluating cycle time, throughput, and production output.
 
 **Current release: V10.5.3**
-
-## Current DIGI production model
-
-The bundled production logic represents a 12-carrier indexed conveyor with **2 PCB per loaded jig**.
-
-| Station | Process time |
-|---|---:|
-| Input | 10.0 s |
-| Pasting Tape | 10.7 s |
-| NFC Init | 7.5 s |
-| Gang Jig | 15.0 s |
-| NG Pickup | 3.0 s |
-| IDLE Station | 0.0 s |
-| Output | 12.0 s |
-
-All stations process in parallel. **Gang Jig (15.0 s)** is the bottleneck. With a **1.0 s synchronized conveyor index**, the steady-state output cycle is:
-
 ```text
 15.0 s process bottleneck
 +1.0 s synchronized index
